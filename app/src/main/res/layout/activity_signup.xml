@@ -5,6 +5,26 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+    <RadioGroup
+        android:id="@+id/radioGroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:orientation="vertical">
+
+        <RadioButton
+            android:id="@+id/userRadio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="User" />
+
+        <RadioButton
+            android:id="@+id/driverRadio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Driver" />
+    </RadioGroup>
+
     <EditText
         android:id="@+id/editTextEmail"
         android:layout_width="match_parent"
@@ -33,6 +53,14 @@
         android:hint="Enter phone"
         android:maxLength="10"
         android:inputType="number"/>
+
+    <EditText
+        android:id="@+id/carText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter car"
+        android:maxLength="10"
+        android:inputType="text"/>
 
     <Button
         android:id="@+id/buttonSignup"

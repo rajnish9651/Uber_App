@@ -7,6 +7,8 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -18,8 +20,16 @@
         android:theme="@style/Theme.UberApp"
         tools:targetApi="31">
         <activity
+            android:name=".drivers.DriverActivity"
+            android:exported="false" />
+
+        <activity android:name=".drivers.DriverProfile"
+            android:exported="false"/>
+
+        <activity
             android:name=".login.UserProfile"
             android:exported="false" />
+
         <activity
             android:name=".login.LoginActivity"
             android:exported="true">
@@ -29,12 +39,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".login.SignupActivity"
             android:exported="false" />
+
         <activity
             android:name=".MainActivity"
-            android:exported="false"></activity>
+            android:exported="false" />
+
     </application>
 
 </manifest>
