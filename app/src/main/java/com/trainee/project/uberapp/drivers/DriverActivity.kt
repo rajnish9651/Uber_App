@@ -1,6 +1,8 @@
 package com.trainee.project.uberapp.drivers
 
+import android.app.ActivityManager
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -9,6 +11,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.trainee.project.uberapp.BookingReceiver
 import com.trainee.project.uberapp.R
 import com.trainee.project.uberapp.model.Booking
 
@@ -44,27 +47,49 @@ class DriverActivity : AppCompatActivity() {
                 for (doc in value!!.documents) {
                     val booking = doc.toObject(Booking::class.java)
                     if (booking != null) {
-                        showBookingDialog(booking)
+                        if (isAppInBackground()){
+
+                            sendBookingNotification(booking)
+                        }
+                        else{
+                            showBookingDialog(booking)
+                        }
+
                     }
                 }
             }
     }
 
     private fun showBookingDialog(booking: Booking) {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("New Ride Request")
-        builder.setMessage("From: ${booking.fromLocation}\nTo: ${booking.toLocation}")
-
-        builder.setPositiveButton("Accept") { _, _ ->
-            acceptBooking(booking.id, auth.currentUser?.uid ?: "")
+        if (isFinishing || isDestroyed) {
+            Log.e("DriverActivity", "Activity is not running, cannot show dialog")
+            return
         }
 
-        builder.setNegativeButton("Reject") { _, _ ->
-            rejectBooking(booking.id)
-        }
+        runOnUiThread {
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle("New Ride Request")
+            builder.setMessage("From: ${booking.fromLocation}\nTo: ${booking.toLocation}")
 
-        builder.setCancelable(false)
-        builder.create().show()
+            builder.setPositiveButton("Accept") { _, _ ->
+                acceptBooking(booking.id, auth.currentUser?.uid ?: "")
+            }
+
+            builder.setNegativeButton("Reject") { _, _ ->
+                rejectBooking(booking.id)
+            }
+
+            builder.setCancelable(false)
+            builder.create().show()
+        }
+    }
+
+    private fun sendBookingNotification(booking: Booking) {
+        val intent = Intent(applicationContext, BookingReceiver::class.java).apply {
+            putExtra("fromLocation", booking.fromLocation)
+            putExtra("toLocation", booking.toLocation)
+        }
+        sendBroadcast(intent)
     }
 
     private fun acceptBooking(bookingId: String, driverId: String) {
@@ -76,7 +101,7 @@ class DriverActivity : AppCompatActivity() {
                 val driverName = document.getString("name") ?: "Unknown"
                 val driverPhone = document.getString("phone") ?: "Not available"
 
-                // Update booking with driver details
+                // Update Firestore
                 fireStore.collection("bookings").document(bookingId)
                     .update(
                         "driverId", driverId,
@@ -86,6 +111,8 @@ class DriverActivity : AppCompatActivity() {
                     )
                     .addOnSuccessListener {
                         Toast.makeText(this, "Booking Accepted!", Toast.LENGTH_SHORT).show()
+                        // Send FCM Notification
+                        sendNotification(bookingId, "Ride Accepted!", "Driver: $driverName\nPhone: $driverPhone")
                     }
                     .addOnFailureListener {
                         Toast.makeText(this, "Error: ${it.message}", Toast.LENGTH_SHORT).show()
@@ -96,6 +123,17 @@ class DriverActivity : AppCompatActivity() {
             }
     }
 
+    // Function to send FCM notification
+    private fun sendNotification(userId: String, title: String, message: String) {
+        val notificationData = hashMapOf(
+            "userId" to userId,
+            "title" to title,
+            "message" to message
+        )
+
+        FirebaseFirestore.getInstance().collection("notifications")
+            .add(notificationData)
+    }
 
     private fun rejectBooking(bookingId: String) {
         fireStore.collection("bookings").document(bookingId)
@@ -103,5 +141,12 @@ class DriverActivity : AppCompatActivity() {
             .addOnSuccessListener {
                 Toast.makeText(this, "Booking Rejected", Toast.LENGTH_SHORT).show()
             }
+    }
+
+    // Check if the app is in background
+    private fun isAppInBackground(): Boolean {
+        val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        val runningTasks = activityManager.getRunningTasks(1)
+        return runningTasks.isEmpty() || runningTasks[0].topActivity?.packageName != packageName
     }
 }

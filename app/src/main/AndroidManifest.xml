@@ -48,6 +48,19 @@
             android:name=".MainActivity"
             android:exported="false" />
 
+        <service
+            android:name=".notifications.MyFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
+
+        <receiver android:name=".BookingReceiver"
+            android:exported="false">
+
+        </receiver>
+
     </application>
 
 </manifest>

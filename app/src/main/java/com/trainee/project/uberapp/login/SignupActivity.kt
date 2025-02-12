@@ -1,5 +1,6 @@
 package com.trainee.project.uberapp.login
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -11,6 +12,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.trainee.project.uberapp.MyLocation
 import com.trainee.project.uberapp.R
 
 class SignupActivity : AppCompatActivity() {
@@ -26,6 +28,7 @@ class SignupActivity : AppCompatActivity() {
     private lateinit var radioGroup: RadioGroup
     private lateinit var userRadio: RadioButton
     private lateinit var driverRadio: RadioButton
+    private lateinit var myLocation: MyLocation
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,6 +45,8 @@ class SignupActivity : AppCompatActivity() {
         carEditText = findViewById(R.id.carText)
         signupButton = findViewById(R.id.buttonSignup)
 
+        myLocation = MyLocation(this)
+
         // Initialize Firebase
         mAuth = FirebaseAuth.getInstance()
         fireStore = FirebaseFirestore.getInstance()
@@ -57,6 +62,11 @@ class SignupActivity : AppCompatActivity() {
                 carEditText.visibility = View.GONE
             }
         }
+
+        // Get saved latitude and longitude
+        val sharedPreferences = getSharedPreferences("address", Context.MODE_PRIVATE)
+        val savedLat = sharedPreferences.getFloat("latitude", 0.0f)
+        val savedLng = sharedPreferences.getFloat("longitude", 0.0f)
 
         signupButton.setOnClickListener {
             val email = emailEditText.text.toString().trim()
@@ -82,7 +92,9 @@ class SignupActivity : AppCompatActivity() {
                             val userDetails = hashMapOf(
                                 "name" to name,
                                 "email" to email,
-                                "phone" to phone
+                                "phone" to phone,
+                                "latitude" to savedLat,
+                                "longitude" to savedLng
                             ).apply {
                                 if (isDriver) put("car", vehicle)
                             }

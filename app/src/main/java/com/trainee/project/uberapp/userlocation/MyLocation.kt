@@ -1,8 +1,8 @@
 package com.trainee.project.uberapp
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.Location
@@ -14,12 +14,11 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
-import androidx.transition.Visibility.Mode
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import java.util.Locale
 
-class MyLocation(private val mainContext: MainActivity) {
+class MyLocation(private val mainContext: Context) {
 
     private val fusedLocationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(mainContext)
 
@@ -44,7 +43,11 @@ class MyLocation(private val mainContext: MainActivity) {
 //                            viewModel.getWeatherViewModel(cityName)
                             val sharedPreferences =
                                 mainContext.getSharedPreferences("address", Context.MODE_PRIVATE)
-                            sharedPreferences.edit().putString("location",cityName).apply()
+//                            sharedPreferences.edit().putString("location",cityName).apply()
+                            sharedPreferences.edit().putString("location", cityName)
+                                    .putFloat("latitude", it.latitude.toFloat())
+                                    .putFloat("longitude", it.longitude.toFloat())
+                                    .apply()
                         }
                     } ?: run {
                         // if location is null
@@ -82,7 +85,7 @@ class MyLocation(private val mainContext: MainActivity) {
     // function to request permissions
     private fun requestPermissions() {
         ActivityCompat.requestPermissions(
-            mainContext,
+            mainContext as Activity,
             arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION),
             PERMISSION_REQUEST_ACCESS_LOCATION
         )

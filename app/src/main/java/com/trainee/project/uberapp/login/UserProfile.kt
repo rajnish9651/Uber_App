@@ -49,10 +49,10 @@ class UserProfile : AppCompatActivity() {
         if (userId != null) {
             val documentReference: DocumentReference = firestore.collection("users").document(userId!!)
 
-            // Fetch user data and listen for real-time updates
+
             documentReference.addSnapshotListener(this) { documentSnapshot, e ->
                 if (e != null) {
-                    // Handle any error in retrieving the data
+
                     return@addSnapshotListener
                 }
 

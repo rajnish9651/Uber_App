@@ -5,6 +5,6 @@ data class Booking(
     val fromLocation: String="",
     val toLocation: String="",
     val userId: String="",
-    val driverId: String? = null, // Initially null, assigned when a driver accepts
-    val status: String = "pending" // pending, accepted, completed
+    val driverId: String? = null,
+    val status: String = "pending"
 )

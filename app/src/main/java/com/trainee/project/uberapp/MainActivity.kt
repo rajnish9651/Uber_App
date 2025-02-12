@@ -101,8 +101,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
-
     private fun showNotificationDialog(message: String) {
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Ride Update")
